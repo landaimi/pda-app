@@ -5,3 +5,15 @@ npm-debug.*
 *.p12
 *.key
 *.mobileprovision
+
+package-lock\.json
+
+android/app/build/
+
+android/\.idea/
+
+android/\.gradle/
+
+android/app/app\.iml
+
+android/app/src/main/java/host/exp/exponent/generated/DetachBuildConstants\.java

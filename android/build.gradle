@@ -60,6 +60,7 @@ allprojects {
     }
     maven { url "https://jitpack.io" }
 
+    maven { url "https://google.bintray.com/exoplayer" }
     // Want this last so that we never end up with a stale cache
     mavenLocal()
   }
