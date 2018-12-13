@@ -8,9 +8,7 @@ export default class Test extends React.Component {
 
   componentWillMount() {
     const that = this;
-    AppRegistry.registerHeadlessTask('ScanBarCodeTaskService', () => {
-      that.setState({ barCode: 1234 });
-    });
+
   }
 
   render() {

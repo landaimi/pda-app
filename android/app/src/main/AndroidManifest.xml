@@ -281,6 +281,14 @@
       </intent-filter>
     </receiver>
 
+
+      <receiver android:name=".ScanBarCodeReceiver" >
+          <intent-filter>
+              <action android:name="android.intent.action.SCANRESULT"/>
+          </intent-filter>
+      </receiver>
+      <service android:name=".ScanBarCodeTaskService" />
+
     <service
       android:name=".gcm.ExponentGcmListenerService"
       android:exported="false">

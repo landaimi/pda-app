@@ -2,6 +2,7 @@ package host.exp.exponent;
 
 import android.os.Bundle;
 
+import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactPackage;
 
 import java.util.ArrayList;
@@ -50,5 +51,25 @@ public class MainActivity extends DetachActivity {
   public Bundle initialProps(Bundle expBundle) {
     // Add extra initialProps here
     return expBundle;
+  }
+
+  @Override
+  protected void onResume() {
+    super.onResume();
+    ((MainApplication) getApplication()).setCurrentActivity(this);
+  }
+
+  @Override
+  protected void onPause() {
+    super.onPause();
+    ((MainApplication) getApplication()).clearCurrentActivity(this);
+  }
+
+  public ReactInstanceManager getReactInstanceManager() {
+    return (ReactInstanceManager) mReactInstanceManager.get();
+  }
+
+  public boolean hasInstance() {
+    return mReactInstanceManager != null && mReactInstanceManager.isNotNull();
   }
 }
