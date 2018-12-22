@@ -1,10 +1,20 @@
 import React from 'react';
 import {
-  StyleSheet, Text, View, Dimensions, TextInput, Alert,
+  StyleSheet, Text, View, Dimensions, TextInput, Alert, AsyncStorage,
 } from 'react-native';
 import ButtonView from './ButtonView';
-import axios from 'axios';
-import Qs from 'qs';
+import Api from './Api';
+import Storage from 'react-native-storage';
+
+var storage = new Storage({
+  size: 1000,
+  storageBackend: AsyncStorage,
+  defaultExpires: 1000 * 3600 * 24 * 7,
+  defaultExpires: null,
+  enableCache: true,
+})
+// 全局变量
+global.storage = storage
 
 const { width, height } = Dimensions.get('window');
 const SCREEN_WIDTH = width;
@@ -18,37 +28,44 @@ export default class Login extends React.Component {
   }
   _onClickLogin = async () => {
     const { userName, userPW } = this.state;
-    if(!userName){
-      Alert.alert('提示',json.msg,[{text: '请输入用户名！' },]);
-      return;
-    }
-    if(!userPW){
-      Alert.alert('提示',json.msg,[{text: '请输入密码！'},]);
-      return;
-    }
+    // if(!userName){
+    //   Alert.alert('提示','请输入用户名！',[{text: '确定', onPress: () => console.log('userName is null')},]);
+    //   return;
+    // }
+    // if(!userPW){
+    //   Alert.alert('提示','请输入密码！',[{text: '确定', onPress: () => console.log('password is null')},]);
+    //   return;
+    // }
     let formData = new FormData();
-    formData.append("userName",userName);
-    formData.append("password",userPW);
-    fetch("http://111.198.65.223:8091/deviceManage-platform/PDAController.do?login", {
+    formData.append("userName",'admin');
+    formData.append("password",'123456');
+    const that = this;
+    fetch(Api.url+"login", {
       method: "POST",
       body: formData,
-  }).then(function (res) {
-      if(res.ok){
-          res.json().then(function (json) {
-              if(json.success){
-                const { userId } = json;
-                this.props.navigation.navigate('Home',{ userId });
-              }else if(json.msg){
-                Alert.alert('提示',json.msg,[{text: '确定', onPress: () => console.log(json)},]);
-              }
-          });
-      }else{
-          Alert.alert('提示','请求失败',[{text: '确定', onPress: () => console.log('request failed! res=',res)},]);
+    }).then(function (res) {
+      if (res.ok) {
+        res.json().then(function (json) {
+          console.log(json);
+          if (json.success) {
+            const { obj } = json;
+            global.storage.save({
+              key: 'token',
+              data: obj,
+              expires: null
+            });
+            that.props.navigation.navigate('Home');
+          } else if (json.msg) {
+            Alert.alert('提示', json.msg, [{ text: '确定', onPress: () => console.log(json) },]);
+          }
+        });
+      } else {
+        Alert.alert('提示', '请求失败', [{ text: '确定', onPress: () => console.warn('request failed! res=', res) },]);
       }
-  }).catch(function (e) {
-      console.log("fetch fail");
-      Alert.alert('提示','系统错误',[{text: '确定', onPress: () => console.log('request error!')},]);
-  });
+    }).catch(function (e) {
+      console.error("fetch error!", e);
+      Alert.alert('提示', '系统错误', [{ text: '确定', onPress: () => console.log('request error!') },]);
+    });
   };
 
   render() {

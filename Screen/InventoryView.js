@@ -1,26 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, } from 'react-native';
-
-const planList = [
-  {
-    id: "4028f78166b5f91b0166b5ff4125000a",
-    name: "驱蚊器翁群无adasd",
-    createPerson: "管理员",
-    pandianPerson: "管理员",
-    startDate: "2018-10-30",
-    endDate: "2018-11-23",
-    status: "待盘点"
-  },
-  {
-    id: "4028f78166b5f91b0166b5ff4125000a",
-    name: "驱蚊器翁群无adasd",
-    createPerson: "管理员",
-    pandianPerson: "管理员",
-    startDate: "2018-10-30",
-    endDate: "2018-11-23",
-    status: "待盘点"
-  }
-];
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import Api from './Api';
 
 const styles = StyleSheet.create({
   list: {
@@ -42,7 +22,6 @@ const styles = StyleSheet.create({
     height: 112,
     flexDirection: 'row',
     alignItems: 'center',
-    // padding:10,
     paddingLeft: 30,
     borderBottomWidth: 1,
     borderTopWidth: 1,
@@ -66,27 +45,101 @@ const styles = StyleSheet.create({
 });
 
 export default class Main extends React.Component {
-  static navigationOptions = {
-    title: '设备盘点',
-  };
 
   constructor(props) {
     super(props);
     this.state = {
       data: [],
+      userId: null,
+      loading: true,
+      type: 1,
     };
   }
-  componentDidMount() {
-    const data = planList;
-    this.setState({ data });
+  async componentDidMount() {
+    const user= await global.storage.load({
+      key:'token'
+    })
+    if(!user){
+      this.props.navigation.navigate('Login');
+    }
+    this.setState({userId: user.userId});
+    const { userId } = user;
+    console.log(this.props.navigation);
+    const param = this.props.navigation.state;
+    const { key } = param;
+    let type;
+    if(key === 'InventoryView'){
+      type = 1;
+    }
+    if(key === 'CheckView'){
+      type = 2;
+    }
+    if(key === 'MaintainView'){
+      type = 3;
+    }
+    this.setState({ type });
+    if(type === 3){
+      return;
+    }
+    if (userId) {
+      this.setState({ userId });
+      let formData = new FormData();
+      formData.append("userId",userId);
+      const that = this;
+      let url ;
+      if(type === 1){
+        url = Api.url+"pandianPlanList";
+      }
+      if(type === 2){
+        url = Api.url+"xunjianPlanList";
+      }
+      fetch(url, {
+        method: "POST",
+        body: formData,
+      }).then(function (res) {
+        if (res.ok) {
+          res.json().then(function (json) {
+            console.log(json);
+            if (json.success) {
+              const { obj } = json;
+              if(obj.planList){
+                that.setState({data: obj.planList, loading: false});
+              }
+            } else if (json.msg) {
+              Alert.alert('提示', json.msg, [{ text: '确定', onPress: () => console.log(json) },]);
+            }
+          });
+        } else {
+          Alert.alert('提示', '请求失败', [{ text: '确定', onPress: () => console.warn('request failed! res=', res) },]);
+        }
+      }).catch(function (e) {
+        console.error("fetch error!", e);
+        Alert.alert('提示', '系统错误', [{ text: '确定', onPress: () => console.log('request error!') },]);
+      });
+    }else{
+      this.props.navigation.navigate('Login');
+    }
   }
 
   gotoItem(planId) {
-    this.props.navigation.navigate('Scanner', { type: 1, planId });
+    const { userId, type } = this.state;
+    this.props.navigation.navigate('Scanner', { type, planId, userId });
   }
 
   render() {
-    const { data } = this.state;
+    const { data, loading, type } = this.state;
+    if (type === 3) {
+      return (
+        <View style={{
+          flex: 1,
+          backgroundColor: '#fff',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <Text>敬请期待！</Text>
+        </View>
+      );
+    }
     return (
       <ScrollView
         style={{ flex: 1, backgroundColor: '#F8F8FF' }}
@@ -95,9 +148,6 @@ export default class Main extends React.Component {
         {data ? data.map(i => (
           <TouchableOpacity onPress={() => this.gotoItem(i.id)} key={i.id}>
             <View style={styles.content}>
-              <Text style={[styles.opc, styles.width, styles.mgr_5, { fontSize: 15, color: '#39333d' }]}>
-                dd
-                      </Text>
               <View style={{ flex: 1 }}>
                 <View style={styles.list}>
                   <Text style={{ fontSize: 15, color: '#39333d' }}>
@@ -110,7 +160,6 @@ export default class Main extends React.Component {
                   </Text>
                 </View>
                 <View style={styles.list}>
-
                   <Text style={{ fontSize: 15, color: '#39333d' }}>
                     结束时间：{i.endDate}
                   </Text>
@@ -118,7 +167,13 @@ export default class Main extends React.Component {
               </View>
             </View>
           </TouchableOpacity>
-        )) : null}
+        )) : loading
+        ? <Text style={[styles.opc, styles.width, styles.mgr_5, { fontSize: 15, color: '#39333d' }]}>
+          正在加载...
+          </Text>
+        : <Text style={[styles.opc, styles.width, styles.mgr_5, { fontSize: 15, color: '#39333d' }]}>
+          没有数据
+          </Text>}
       </ScrollView>
     );
   }

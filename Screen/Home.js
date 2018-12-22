@@ -1,22 +1,28 @@
-import React from 'react';
-import { Button, Image, View, Text } from 'react-native';
 import { createStackNavigator, createMaterialTopTabNavigator } from 'react-navigation'; // 1.0.0-beta.27
-import CheckView from './CheckView';
-import MaintainView from './MaintainView';
 import InventoryView from './InventoryView';
-
 
 const HomeScreen = createMaterialTopTabNavigator(
   {
     InventoryView: {
       screen: InventoryView,
+      navigationOptions: () => ({
+        title: '设备盘点',
+      }),
     },
     CheckView: {
-      screen: CheckView,
+      screen: InventoryView,
+      navigationOptions: () => ({
+        title: '设备巡检',
+      }),
     },
     MaintainView: {
-      screen: MaintainView,
+      screen: InventoryView,
+      navigationOptions: () => ({
+        title: '设备保养',
+      }),
     },
+  },{
+    lazy: true,
   }
 );
 
