@@ -28,17 +28,17 @@ export default class Login extends React.Component {
   }
   _onClickLogin = async () => {
     const { userName, userPW } = this.state;
-    // if(!userName){
-    //   Alert.alert('提示','请输入用户名！',[{text: '确定', onPress: () => console.log('userName is null')},]);
-    //   return;
-    // }
-    // if(!userPW){
-    //   Alert.alert('提示','请输入密码！',[{text: '确定', onPress: () => console.log('password is null')},]);
-    //   return;
-    // }
+    if(!userName){
+      Alert.alert('提示','请输入用户名！',[{text: '确定', onPress: () => console.log('userName is null')},]);
+      return;
+    }
+    if(!userPW){
+      Alert.alert('提示','请输入密码！',[{text: '确定', onPress: () => console.log('password is null')},]);
+      return;
+    }
     let formData = new FormData();
-    formData.append("userName",'admin');
-    formData.append("password",'123456');
+    formData.append("userName",userName);
+    formData.append("password",userPW);
     const that = this;
     fetch(Api.url+"login", {
       method: "POST",
