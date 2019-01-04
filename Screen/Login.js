@@ -50,19 +50,17 @@ export default class Login extends React.Component {
 
   _onClickLogin = async () => {
     const { userName, userPW } = this.state;
-    // if(!userName){
-    //   Alert.alert('提示','请输入用户名！',[{text: '确定', onPress: () => console.log('userName is null')},]);
-    //   return;
-    // }
-    // if(!userPW){
-    //   Alert.alert('提示','请输入密码！',[{text: '确定', onPress: () => console.log('password is null')},]);
-    //   return;
-    // }
+    if(!userName){
+      Alert.alert('提示','请输入用户名！',[{text: '确定', onPress: () => console.log('userName is null')},]);
+      return;
+    }
+    if(!userPW){
+      Alert.alert('提示','请输入密码！',[{text: '确定', onPress: () => console.log('password is null')},]);
+      return;
+    }
     let formData = new FormData();
-    // formData.append("userName",userName);
-    // formData.append("password",userPW);
-    formData.append("userName","admin");
-    formData.append("password","123456");
+    formData.append("userName",userName);
+    formData.append("password",userPW);
     const that = this;
     console.log(this.urlConfig+API.location+"login");
     fetch(this.urlConfig+API.location+"login", {
@@ -101,8 +99,14 @@ export default class Login extends React.Component {
     return (
       <View style={styles.container}>
         <View style={[styles.lineStyle, { top: 0 }]} />
+        <View style={styles.BGtitle}>
+          <Text style={styles.title}>
+            医学装备管理软件
+            </Text>
+        </View>
         <View style={styles.BGViewStyle}>
           <View style={[styles.inputCellStyle, { height: 49.75, top: 0, right: 0, }]}>
+
             <Text style={styles.welcome}>
               用户名
             </Text>
@@ -150,6 +154,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F5FCFF',
     flexDirection: 'column',
+  },
+  BGtitle: {
+    position: 'absolute',
+    top: 80,
+    left: 0,
+    right: 0,
+    height: 50,
+    flexDirection: 'column',
+  },
+  title: {
+    fontSize: 20,
+    textAlign: 'center',
+    margin: 10,
+    height: 26.5,
   },
   BGViewStyle: {
     position: 'absolute',

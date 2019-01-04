@@ -208,7 +208,7 @@ class InventoryInfo extends React.Component {
     }
 
     onSubmit() {
-        const { dict1Index, dict2Index, remark, position, userId, planId, type } = this.state;
+        const { dict1Index, dict2Index, remark, position, userId, itemId, type } = this.state;
         console.log('dict1Index', dict1Index, dict2Index);
         if (dict1Index === undefined) {
             if(type===1){
@@ -243,7 +243,7 @@ class InventoryInfo extends React.Component {
         if (type === 2) {
             url = this.urlConfig + API.location + "xunjianSubmit";
             formData.append("userId", userId);
-            formData.append("itemId", planId);
+            formData.append("itemId", itemId);
             formData.append("result", dict1Index);
             formData.append("report", remark);
             formData.append("position", position);
@@ -251,8 +251,8 @@ class InventoryInfo extends React.Component {
         if (type === 1) {
             url = this.urlConfig + API.location + "pandianSubmit";
             formData.append("userId", userId);
-            formData.append("itemId", planId);
-            formData.append("result", dict1Index);
+            formData.append("itemId", itemId);
+            formData.append("report", dict1Index);
             formData.append("position", dict2Index);
         }
         const that = this;
@@ -265,9 +265,8 @@ class InventoryInfo extends React.Component {
                     if (json.success) {
                         Alert.alert('提示', json.msg, [{
                             text: '确定',
-                            onPress: () => that.setState({ submitSuccess: true })
+                            onPress: () => that.onBackButtonPressAndroid()
                         },]);
-                        that.onBackButtonPressAndroid();
                     } else if (json.msg) {
                         Alert.alert('提示', json.msg, [{
                             text: '确定',
@@ -298,7 +297,7 @@ class InventoryInfo extends React.Component {
     render() {
         const sty = style;
         const { itemInfo, dict1, dict1Index,
-            dict2, dict2Index, resultCode, type, submitSuccess, position } = this.state;
+            dict2, dict2Index, type,} = this.state;
         return (
             <View style={[sty.page, sty.pageContent, { paddingBottom: this.state.keyboardHeight }]}>
                 <ScrollView ref={(ref) => { this.scrollView = ref; }}
