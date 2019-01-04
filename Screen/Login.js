@@ -3,7 +3,7 @@ import {
   StyleSheet, Text, View, Dimensions, TextInput, Alert, AsyncStorage,
 } from 'react-native';
 import ButtonView from './ButtonView';
-import Api from './Api';
+import API from './Api';
 import Storage from 'react-native-storage';
 
 var storage = new Storage({
@@ -26,21 +26,46 @@ export default class Login extends React.Component {
       userPW: "",
     };
   }
+
+  async componentDidMount() {
+    let config;
+    try {
+      config = await global.storage.load({
+        key: 'config'
+      });
+    } catch (e) {
+
+    }
+    if (!config) {
+      global.storage.save({
+        key: 'config',
+        data: { url: 'http://111.198.65.223:8091' },
+        expires: null
+      });
+      this.urlConfig = 'http://111.198.65.223:8091';
+    }else{
+      this.urlConfig = config.url;
+    }
+  }
+
   _onClickLogin = async () => {
     const { userName, userPW } = this.state;
-    if(!userName){
-      Alert.alert('提示','请输入用户名！',[{text: '确定', onPress: () => console.log('userName is null')},]);
-      return;
-    }
-    if(!userPW){
-      Alert.alert('提示','请输入密码！',[{text: '确定', onPress: () => console.log('password is null')},]);
-      return;
-    }
+    // if(!userName){
+    //   Alert.alert('提示','请输入用户名！',[{text: '确定', onPress: () => console.log('userName is null')},]);
+    //   return;
+    // }
+    // if(!userPW){
+    //   Alert.alert('提示','请输入密码！',[{text: '确定', onPress: () => console.log('password is null')},]);
+    //   return;
+    // }
     let formData = new FormData();
-    formData.append("userName",userName);
-    formData.append("password",userPW);
+    // formData.append("userName",userName);
+    // formData.append("password",userPW);
+    formData.append("userName","admin");
+    formData.append("password","123456");
     const that = this;
-    fetch(Api.url+"login", {
+    console.log(this.urlConfig+API.location+"login");
+    fetch(this.urlConfig+API.location+"login", {
       method: "POST",
       body: formData,
     }).then(function (res) {
@@ -68,10 +93,14 @@ export default class Login extends React.Component {
     });
   };
 
+  _onClickConfig(){
+    this.props.navigation.navigate('Config');
+  };
+
   render() {
     return (
       <View style={styles.container}>
-        <View style={[styles.lineStyle, { top: 99 }]} />
+        <View style={[styles.lineStyle, { top: 0 }]} />
         <View style={styles.BGViewStyle}>
           <View style={[styles.inputCellStyle, { height: 49.75, top: 0, right: 0, }]}>
             <Text style={styles.welcome}>
@@ -105,6 +134,13 @@ export default class Login extends React.Component {
           btnStyle={styles.loginBtnStyle}
           onPress={this._onClickLogin}
         />
+
+        <ButtonView
+          btnName='系统配置'
+          btnStyle={styles.forgetPWStyle}
+          onPress={() => this._onClickConfig()}
+          textStyle={{ color: '#D6D6D6', justifyContent: 'flex-end',textDecorationLine:'underline' }}
+        />
       </View>
     );
   }
@@ -117,7 +153,7 @@ const styles = StyleSheet.create({
   },
   BGViewStyle: {
     position: 'absolute',
-    top: 50,
+    top: 150,
     left: 0,
     right: 0,
     height: 100,
@@ -134,13 +170,13 @@ const styles = StyleSheet.create({
     height: 49.5, right: 0, left: 80, top: 0, borderColor: 'white', borderWidth: 1, position: 'absolute'
   },
   loginBtnStyle: {
-    backgroundColor: '#3385ff', height: 45, width: SCREEN_WIDTH - 32, top: 150, position: 'absolute', margin: 16,
+    backgroundColor: '#3385ff', height: 45, width: SCREEN_WIDTH - 32, top: 250, position: 'absolute', margin: 16,
   },
   forgetPWStyle: {
     margin: 16,
     position: 'absolute',
     right: 0,
-    top: 210,
+    top: 310,
     width: 150,
     height: 30,
     alignItems: 'flex-end',

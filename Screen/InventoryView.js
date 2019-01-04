@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import Api from './Api';
+import API from './Api';
 
 const styles = StyleSheet.create({
   list: {
@@ -19,15 +19,15 @@ const styles = StyleSheet.create({
     opacity: 1,
   },
   content: {
-    height: 112,
+    height: 125,
     flexDirection: 'row',
     alignItems: 'center',
     paddingLeft: 30,
     borderBottomWidth: 1,
     borderTopWidth: 1,
     borderColor: '#ddd',
-    marginBottom: 3 ,
-    backgroundColor: '#fff',
+    marginBottom: 8 ,
+    backgroundColor: '#E1FFFF',
   },
   width: {
     width: 70,
@@ -56,15 +56,45 @@ export default class Main extends React.Component {
     };
   }
   async componentDidMount() {
-    const user= await global.storage.load({
-      key:'token'
-    })
+    let config;
+    try {
+      config = await global.storage.load({
+        key: 'config'
+      });
+    } catch (e) {
+
+    }
+    if (!config) {
+      global.storage.save({
+        key: 'config',
+        data: { url: 'http://111.198.65.223:8091' },
+        expires: null
+      });
+      this.urlConfig = 'http://111.198.65.223:8091';
+    }else{
+      this.urlConfig = config.url;
+    }
+    await this.init();
+  }
+
+  async componentWillReceiveProps(props){
+    await this.init();
+  }
+
+  async init(){
+    let user;
+    try {
+      user = await global.storage.load({
+        key: 'token'
+      })
+    } catch (e) {
+
+    }
     if(!user){
       this.props.navigation.navigate('Login');
     }
     this.setState({userId: user.userId});
     const { userId } = user;
-    console.log(this.props.navigation);
     const param = this.props.navigation.state;
     const { key } = param;
     let type;
@@ -88,10 +118,10 @@ export default class Main extends React.Component {
       const that = this;
       let url ;
       if(type === 1){
-        url = Api.url+"pandianPlanList";
+        url = this.urlConfig+API.location+"pandianPlanList";
       }
       if(type === 2){
-        url = Api.url+"xunjianPlanList";
+        url = this.urlConfig+API.location+"xunjianPlanList";
       }
       fetch(url, {
         method: "POST",
@@ -99,14 +129,13 @@ export default class Main extends React.Component {
       }).then(function (res) {
         if (res.ok) {
           res.json().then(function (json) {
-            console.log(json);
             if (json.success) {
               const { obj } = json;
               if(obj.planList){
                 that.setState({data: obj.planList, loading: false});
               }
             } else if (json.msg) {
-              Alert.alert('提示', json.msg, [{ text: '确定', onPress: () => console.log(json) },]);
+              Alert.alert('提示', json.msg, [{ text: '确定', onPress: () => console.warn(json) },]);
             }
           });
         } else {
@@ -114,13 +143,12 @@ export default class Main extends React.Component {
         }
       }).catch(function (e) {
         console.error("fetch error!", e);
-        Alert.alert('提示', '系统错误', [{ text: '确定', onPress: () => console.log('request error!') },]);
+        Alert.alert('提示', '系统错误', [{ text: '确定', onPress: () => console.error('request error!') },]);
       });
     }else{
       this.props.navigation.navigate('Login');
     }
   }
-
   gotoItem(planId) {
     const { userId, type } = this.state;
     this.props.navigation.navigate('Scanner', { type, planId, userId });
@@ -150,7 +178,7 @@ export default class Main extends React.Component {
             <View style={styles.content}>
               <View style={{ flex: 1 }}>
                 <View style={styles.list}>
-                  <Text style={{ fontSize: 15, color: '#39333d' }}>
+                  <Text style={{ fontSize: 15, color: '#39333d',fontWeight:'bold' }}>
                     {i.name}
                   </Text>
                 </View>
@@ -162,6 +190,21 @@ export default class Main extends React.Component {
                 <View style={styles.list}>
                   <Text style={{ fontSize: 15, color: '#39333d' }}>
                     结束时间：{i.endDate}
+                  </Text>
+                </View>
+                <View style={styles.list}>
+                  <Text style={{ fontSize: 15, color: '#39333d' }}>
+                    {type === 1 ? '巡检进度' : (type === 2 ? '盘点进度' : '') }：
+
+                  </Text>
+                  <Text style={{ fontSize: 15, color: 'red' }}>
+                  {i.finishedNum || '0'}
+                  </Text>
+                  <Text style={{ fontSize: 15, color: '#39333d' }}>
+                  /
+                  </Text>
+                  <Text style={{ fontSize: 15, color: '#39333d' }}>
+                  {i.totalNum || '0'}
                   </Text>
                 </View>
               </View>

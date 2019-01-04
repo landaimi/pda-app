@@ -3,6 +3,7 @@ import Login from './Screen/Login';
 import Home from './Screen/Home';
 import BarcodeScannerView from './Screen/BarcodeScannerView';
 import InventoryInfo from './Screen/InventoryInfo';
+import Config from './Screen/Config';
 
 const TabNavigator = createSwitchNavigator({
   Login: {
@@ -16,6 +17,9 @@ const TabNavigator = createSwitchNavigator({
   },
   InventoryInfo: {
     screen: InventoryInfo,
+  },
+  Config: {
+    screen: Config,
   },
 });
 
